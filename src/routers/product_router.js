@@ -7,48 +7,33 @@ const product_router = express.Router();
 
 // Bringing SQL connector in
 const database_connector = require("../middleware/database_connector");
-const sql = database_connector();
 
 // POST /product/list
 product_router.post('/product/list', async (req, res) => {
   try {
-    const { category, price_range, search_query, sort_by } = req.body.FilterContexts;
-
-    // Construct the SQL query using parameterized queries
-    // This basically creates SQL queries based on what we have supplied
-    // as FilterContexts 
-    // This section COULD be dangerous for SQL injection, but paramterized
-    // queries will hopefully avoid that.
+    const { FilterContexts } = req.body;
 
     const query = `
       SELECT *
       FROM products
-      WHERE category = @category
-        AND price BETWEEN @min_price AND @max_price
-        AND (product_name LIKE @search_query OR product_description LIKE @search_query)
-      ORDER BY @sort_by
+      WHERE category = $1
+        AND price BETWEEN $2 AND $3
     `;
 
-    // Set the parameter values for the SQL query
-    const min_price = price_range.min_price || 0;
-    const max_price = price_range.max_price || Number.MAX_SAFE_INTEGER;
-    const search_query_like = `%${search_query}%`;
+    // This assumes you understand FilterContexts comes with possible 'category', etc.
 
-    // Connect to the datbase
-    const pool = sql.createConnection();
+    // TODO: Add the rest of the available FilterContexts
+    const values = [
+      FilterContexts.category,
+      FilterContexts.minPrice,
+      FilterContexts.maxPrice
+    ];
 
-    // Execute the SQL query and return the results
-    const result = await sql.query(query, {
-      category,
-      min_price,
-      max_price,
-      search_query_like,
-      sort_by,
-    });
+    const result = await database_connector.query(query, values);
 
-    return res.status(200).json({ products: result.recordset });
-  } catch (err) {
-    console.error(err);
+    return res.json({ products: result.rows });
+  } catch (error) {
+    console.error('Error fetching products:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -56,69 +41,96 @@ product_router.post('/product/list', async (req, res) => {
 // PATCH /product/modify
 product_router.patch('/product/modify', async (req, res) => {
   try {
-    const changedInstruction = req.body.changedInstruction;
-    //Validate the changedInstruction object here
-    //...
+    // This shows assuming that changedInsturction object contains what we see here
+    // Any of this fails, we fail.
 
-    // Create connection
-    const pool = sql.createConnection();
+    const { changedInstruction } = req.body;
 
-    //Begin a transaction to ensure atomicity of the modifications
-    const transaction = await pool.transaction();
-
-    //Execute each modification in the changedInstruction array as a separate query
     for (const instruction of changedInstruction) {
-      await transaction.request()
-        .input('productId', sql.Int, instruction.product_id)
-        .input('productName', sql.VarChar, instruction.product_name)
-        .input('productDescription', sql.VarChar, instruction.product_description)
-        .input('productSkuNumber', sql.VarChar, instruction.product_sku_number)
-        .input('productCategory', sql.VarChar, instruction.product_category)
-        .input('productPrice', sql.Decimal, instruction.product_price)
-        .input('productTags', sql.VarChar, instruction.product_tags)
-        .query('UPDATE Products SET Name = @productName, Description = @productDescription, SkuNumber = @productSkuNumber, Category = @productCategory, Price = @productPrice, Tags = @productTags WHERE Id = @productId');
+      const { product_id, ...changes } = instruction;
+
+      const query = `
+        UPDATE products
+        SET ${Object.keys(changes)
+          .map((key, index) => `${key} = $${index + 2}`)
+          .join(', ')}
+        WHERE product_id = $1
+        RETURNING *
+      `;
+
+      const values = [product_id, ...Object.values(changes)];
+
+      const result = await pool.query(query, values);
+
+      if (result.rows.length === 0) {
+        throw new Error(`Product with ID ${product_id} not found`);
+      }
     }
 
-    //Commit the transaction to apply the modifications
-    await transaction.commit();
-
-    //Close the connection pool
-    await pool.close();
-
-    res.send('Modifications applied successfully');
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Server error');
+    return res.sendStatus(200);
+  } catch (error) {
+    console.error('Error modifying products:', error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // DELETE /product/delete
-product_router.delete('/product/delete', async (req, res) => {
+app.delete('/product/delete', async (req, res) => {
   try {
     const { product_id } = req.body;
 
-    // Create connection
-    const pool = sql.createConnection();
-
-    // Validate that product_id exists in the database
-    const product = await sql.query`
-      SELECT *
-      FROM products
-      WHERE product_id = ${product_id}
+    const query = `
+      DELETE FROM products
+      WHERE product_id = $1
+      RETURNING *
     `;
-    if (!product.recordset.length) {
-      return res.status(404).json({ error: `Product with id ${product_id} not found` });
+
+    const result = await pool.query(query, [product_id]);
+
+    if (result.rows.length === 0) {
+      throw new Error(`Product with ID ${product_id} not found`);
     }
 
-    // Delete product with the specified product_id from the database
-    await sql.query`
-      DELETE FROM products
-      WHERE product_id = ${product_id}
-    `;
+    return res.sendStatus(200);
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
-    return res.status(200).json({ message: `Product with id ${product_id} deleted successfully` });
-  } catch (err) {
-    console.error(err);
+// Endpoint to add products
+product_router.post('/product/add', async (req, res) => {
+  try {
+
+    // Again, this just assumes you know the objects.
+    // Enforcing and documentation to clarify later.
+    const { productObjects } = req.body;
+
+    for (const product of productObjects) {
+      const { product_id, ...productData } = product;
+
+      const query = `
+        INSERT INTO products (product_id, product_name, product_description, product_sku_number, product_category, product_price, product_tags)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        ON CONFLICT (product_id) DO NOTHING
+      `;
+
+      const values = [
+        product_id,
+        productData.product_name,
+        productData.product_description,
+        productData.product_sku_number,
+        productData.product_category,
+        productData.product_price,
+        productData.product_tags
+      ];
+
+      await pool.query(query, values);
+    }
+
+    return res.sendStatus(200);
+  } catch (error) {
+    console.error('Error adding products:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 });

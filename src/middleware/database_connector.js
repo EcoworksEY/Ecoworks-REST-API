@@ -2,34 +2,17 @@
 // Written by Bardia Habib Khoda
 
 // Library Injections
-const express = require('express');
-const sql = require('mssql');
+const { Pool } = require('pg');
 
-// create the object type
-class database_connector {
-
-    // Creating this class for later re-use with other databases
-    constructor(sql_database, database_name) {
-        this.sql_database = sql_database || sql;
-        this.database_name = database_name || "no"; 
+const database_connector = new Pool({
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    database: process.env.DB_DATABASE,
+    ssl: {
+        rejectUnauthorized: false // For self-signed certificates, set this to false
     }
-
-    async createConnection() {
-
-        //Create a new SQL connection pool
-        // This still goes to the process environment variables.
-        const pool = await sql.connect({
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            server: process.env.DB_SERVER,
-            database: process.env.DB_DATABASE,
-            options: {
-            encrypt: true //For secure connections
-            }
-      });
-
-      return pool;
-    }
-}
+});
 
 module.export = database_connector;

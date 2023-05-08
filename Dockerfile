@@ -9,10 +9,10 @@ COPY package.* .
 
 # Installing App dependencies
 # Updatig npm on build side
-RUN npm isntall -g npm@latest
+RUN npm install -g npm@latest
 
 # Update all npm packages locally
-RUN npm isntall
+RUN npm install
 # Cop all the remaining code
 COPY . .
 
