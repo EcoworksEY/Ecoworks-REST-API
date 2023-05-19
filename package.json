@@ -1,0 +1,36 @@
+{
+  "name": "product-rest-api-microrepo",
+  "version": "0.0.0",
+  "description": "Products REST API Backend for Ecoworks",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EcoworksEY/Product-REST-API-microrepo.git"
+  },
+  "keywords": [
+    "javascript"
+  ],
+  "author": "Bardia Habib Khoad",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/EcoworksEY/Product-REST-API-microrepo/issues"
+  },
+  "homepage": "https://github.com/EcoworksEY/Product-REST-API-microrepo#readme",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "fs": "^0.0.1-security",
+    "helmet": "^7.0.0",
+    "pg": "^8.10.0",
+    "schema-object": "^4.0.11",
+    "sequelize": "^6.31.1",
+    "simple-ssh": "^1.1.1",
+    "ssh2-promise": "^1.0.3",
+    "tunnel-ssh": "^5.0.5"
+  }
+}
