@@ -13,27 +13,56 @@ product_router.get('/list', async (req, res) => {
 
   // Connect to PSQL
   // Assuming PSQL is hosted on DB Port and at Localhost
+  
   try {
+      // See if a single product was requested or no
+      const product_id = [req.query.product_id];
       // Run list query in PSQL
-      database_connector.query('SELECT * FROM product;', (err, data) => {
-      if (err) {
-        // Error occured
-        console.error("Internal Server Error.", err);
-        //database_connector.end();
-        return res.status(err.status).json({ error: err });
+      var query = ``;
+      if(req.query.product_id == undefined)
+      {
+        console.log("All products list requested");
+        query = `SELECT *
+        FROM product;`;
+        database_connector.query(query, (err, data) => {
+          if (err) {
+            // Error occured
+            console.error("Internal Server Error.", err);
+            //database_connector.end();
+            return res.status(err.status).json({ error: err });
+          }
+          else {
+            // Safely return all of the products
+            //database_connector.end();
+            return res.status(200).json({ products: data.rows });
+          }
+        })
       }
       else {
-        // Safely return all of the products
-        //database_connector.end();
-        return res.status(200).json({ products: data.rows });
-      }
-    }) 
+        console.log("Single product requested");
+        query = `SELECT *
+        FROM product
+        WHERE product_id = $1;`
+        database_connector.query(query, product_id, (err, data) => {
+          if (err) {
+            // Error occured
+            console.error("Internal Server Error.", err);
+            //database_connector.end();
+            return res.status(err.status).json({ error: err });
+          }
+          else {
+            // Safely return all of the products
+            //database_connector.end();
+            return res.status(200).json({ products: data.rows });
+          }
+        })
+      } 
       } catch (error) {
         // Error caught
         console.error("Internal server error", error);
         //database_connector.end();
         res.status(500).json({error: error});
-}
+      }
 });
 
 // PATCH /product/modify
@@ -59,7 +88,7 @@ product_router.patch('/modify', async (req, res) => {
       for (var key of keys) {
         // A bit hardcoded
         console.log(key);
-        if ((key != 'product_id') && (key != 'name') && (key != 'description') && (key != 'price'))
+        if ((key != 'product_id') && (key != 'name') && (key != 'description') && (key != 'price') && (key != 'sku_units'))
         {
           // Invalid key
           throw new Error(`change instruction with key ${key} is invalid`);
@@ -132,7 +161,7 @@ product_router.post('/add', async (req, res) => {
       const { product_id, ...productData } = product;
 
       const query = `
-        INSERT INTO product (product_id, name, description, price)
+        INSERT INTO product (product_id, name, description, price, sku_units)
         VALUES ($1, $2, $3, $4)
         ON CONFLICT (product_id) DO NOTHING
       `;
@@ -142,7 +171,8 @@ product_router.post('/add', async (req, res) => {
         product_id,
         productData.name,
         productData.description,
-        productData.price
+        productData.price,
+        productData.sku_units
       ];
 
       await database_connector.query(query, values);
