@@ -5,8 +5,8 @@ phases:
     commands:
       - echo Logging in to Amazon ECR...
       - aws --version
-      - aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --[PLEASE ENTER YOUR CONTAINER REGISTRY ADDRESS]
-      - REPOSITORY_URI=[PLEASE ENTER YOUR CONTAINER REGISTRY INFO]
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --991574611232.dkr.ecr.us-east-1.amazonaws.com
+      - REPOSITORY_URI=991574611232.dkr.ecr.us-east-1.amazonaws.com/ecoworks/rest-api
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
   build:
