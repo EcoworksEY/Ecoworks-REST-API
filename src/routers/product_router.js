@@ -65,6 +65,32 @@ product_router.get('/list', async (req, res) => {
       }
 });
 
+product_router.get('/photo-link', async (req, res) => {
+  // Try getting 
+  try {
+    // Got in
+    const product_id = [req.query.product_id];
+    // Cycle through the database and return all possible photos.
+    query = `SELECT photo_link FROM photo WHERE product_id = $1;`
+    database_connector.query(query, product_id, (err, data) => {
+      if (err) {
+        // Erro occured
+        console.error("Internal server error.", err);
+        return res.status(err.status).json({ error: err});
+      }
+      else {
+        // All good, proceed
+        return res.status(200).json({photos: data.rows});
+      }
+    })
+  }
+  catch (error)
+  {
+    console.error(error);
+    res.status(500).json({ error: error});
+  }
+});
+
 // PATCH /product/modify
 product_router.patch('/modify', async (req, res) => {
   try {

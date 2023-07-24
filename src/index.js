@@ -6,7 +6,8 @@ const express = require('express');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const dotenv = require('dotenv').config();
-const product_router = require("./routers/product_router")
+const product_router = require("./routers/product_router");
+const user_router = require('./routers/user_router');
 
 // App setup with required dependencies
 const app = express();
@@ -18,6 +19,7 @@ app.use(bodyParser.json());
 
 // Configure the app to use the routers
 app.use("/product", product_router);
+app.use("/auth", user_router);
 
 // Start the app
 app.listen(port, () => console.log(`Server listening on port ${port}...`));

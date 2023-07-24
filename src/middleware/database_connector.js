@@ -7,10 +7,10 @@ const { Client } = require('pg');
 const database_connector = new Client({
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    host: process.env.DB_HOST,
+    host: process.env.DB_HOST_LOCALHOST,
     port: process.env.DB_PORT
 });
 
-database_connector.connect();
+database_connector.connect()
 
 module.exports = database_connector;
