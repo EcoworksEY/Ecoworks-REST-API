@@ -9,6 +9,8 @@ phases:
       - REPOSITORY_URI=991574611232.dkr.ecr.us-east-1.amazonaws.com/ecoworks/rest-api
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=${COMMIT_HASH:=latest}
+      - echo Acquiring .env file for Rest API server
+      - aws s3 cp s3://environment-vars-bucket-us-east-1/.env .env
   build:
     commands:
       - echo Build started on `date`
