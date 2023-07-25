@@ -11,8 +11,6 @@ phases:
       - IMAGE_TAG=${COMMIT_HASH:=latest}
   build:
     commands:
-      - echo Connecting to Docker Daemon
-      - sudo dockerd
       - echo Build started on `date`
       - docker build -t $REPOSITORY_URI:latest .
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
