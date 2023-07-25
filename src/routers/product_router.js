@@ -6,7 +6,7 @@ const express = require("express");
 const product_router = express.Router();
 
 // Bringing SQL connector in
-const database_promise = require("../middleware/database_connector");
+const database_connector = require("../middleware/database_connector");
 
 product_router.get('/list', async (req, res) => {
   // Getting a list o fall available products
@@ -18,7 +18,6 @@ product_router.get('/list', async (req, res) => {
       // See if a single product was requested or no
       // Connect to PSQL
       // Assuming PSQL is hosted on DB Port and at Localhost
-      const database_connector = await database_promise;
 
       const product_id = [req.query.product_id];
       // Run list query in PSQL
@@ -74,7 +73,6 @@ product_router.get('/photo-link', async (req, res) => {
   try {
       // Connect to PSQL
       // Assuming PSQL is hosted on DB Port and at Localhost
-      const database_connector = await database_promise;
       // Got in
       const product_id = [req.query.product_id];
       // Cycle through the database and return all possible photos.
@@ -103,7 +101,6 @@ product_router.patch('/modify', async (req, res) => {
   try {
     // Connect to PSQL
     // Assuming PSQL is hosted on DB Port and at Localhost
-    const database_connector = await database_promise;
 
 
     // This shows assuming that changedInsturction object contains what we see here
@@ -169,7 +166,6 @@ product_router.delete('/delete', async (req, res) => {
   try {
     // Connect to PSQL
     // Assuming PSQL is hosted on DB Port and at Localhost
-    const database_connector = await database_promise;
     
     const { product_ids } = req.body;
 
@@ -197,7 +193,6 @@ product_router.post('/add', async (req, res) => {
   try {
     // Connect to PSQL
     // Assuming PSQL is hosted on DB Port and at Localhost
-    const database_connector = await database_promise;
     
     // Again, this just assumes you know the objects.
     // Enforcing and documentation to clarify later.

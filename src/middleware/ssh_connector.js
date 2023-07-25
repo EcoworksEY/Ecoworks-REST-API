@@ -1,12 +1,12 @@
 // SSH Tunnel Connector
 // Written by Bardia Habib Khoda
 
-const tunnel = require('tunnel-ssh');
+const { createTunnel } = require('tunnel-ssh');
 const fs = require('fs');
 
 const sshConfig = {
   username: process.env.EC2_USER,
-  privateKey: fs.readFileSync(process.env.SSH_KEY_FILE_PATH_LOCAL),
+  privateKey: fs.readFileSync('C:\\Users\\XK444SM\\Downloads\\ecoworks-database.pem'),
   host: process.env.EC2_GATEWAY_HOST,
   port: 22,
   dstHost: process.env.DB_HOST,
@@ -15,9 +15,9 @@ const sshConfig = {
   localPort: process.env.DB_PORT,
 };
 
-const createSSHTunnel = () => {
+async function createSSHTunnel() {
   return new Promise((resolve, reject) => {
-    const sshTunnel = tunnel(sshConfig, (error, server) => {
+    const sshTunnel = createTunnel(sshConfig, (error, server) => {
       if (error) {
         console.error('Error establishing SSH tunnel:', error);
         reject(error);
@@ -26,12 +26,7 @@ const createSSHTunnel = () => {
         resolve(sshTunnel);
       }
     });
-
-    sshTunnel.on('error', (error) => {
-      console.error('SSH Tunnel error:', error);
-      reject(error);
-    });
   });
 };
 
-module.exports = createSSHTunnel;
+module.exports = { createSSHTunnel };
