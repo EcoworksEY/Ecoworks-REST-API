@@ -6,7 +6,7 @@ const express = require("express");
 const product_router = express.Router();
 
 // Bringing SQL connector in
-const database_connector = require("../middleware/database_connector");
+const database_promise = require("../middleware/database_connector");
 
 product_router.get('/list', async (req, res) => {
   // Getting a list o fall available products
@@ -16,6 +16,10 @@ product_router.get('/list', async (req, res) => {
   
   try {
       // See if a single product was requested or no
+      // Connect to PSQL
+      // Assuming PSQL is hosted on DB Port and at Localhost
+      const database_connector = await database_promise;
+
       const product_id = [req.query.product_id];
       // Run list query in PSQL
       var query = ``;
@@ -68,22 +72,25 @@ product_router.get('/list', async (req, res) => {
 product_router.get('/photo-link', async (req, res) => {
   // Try getting 
   try {
-    // Got in
-    const product_id = [req.query.product_id];
-    // Cycle through the database and return all possible photos.
-    query = `SELECT photo_link FROM photo WHERE product_id = $1;`
-    database_connector.query(query, product_id, (err, data) => {
-      if (err) {
-        // Erro occured
-        console.error("Internal server error.", err);
-        return res.status(err.status).json({ error: err});
-      }
-      else {
-        // All good, proceed
-        return res.status(200).json({photos: data.rows});
-      }
-    })
-  }
+      // Connect to PSQL
+      // Assuming PSQL is hosted on DB Port and at Localhost
+      const database_connector = await database_promise;
+      // Got in
+      const product_id = [req.query.product_id];
+      // Cycle through the database and return all possible photos.
+      query = `SELECT photo_link FROM photo WHERE product_id = $1;`
+      database_connector.query(query, product_id, (err, data) => {
+        if (err) {
+          // Erro occured
+          console.error("Internal server error.", err);
+          return res.status(err.status).json({ error: err});
+        }
+        else {
+          // All good, proceed
+          return res.status(200).json({photos: data.rows});
+        }
+      })
+    }
   catch (error)
   {
     console.error(error);
@@ -94,6 +101,11 @@ product_router.get('/photo-link', async (req, res) => {
 // PATCH /product/modify
 product_router.patch('/modify', async (req, res) => {
   try {
+    // Connect to PSQL
+    // Assuming PSQL is hosted on DB Port and at Localhost
+    const database_connector = await database_promise;
+
+
     // This shows assuming that changedInsturction object contains what we see here
     // Any of this fails, we fail.
 
@@ -155,6 +167,10 @@ product_router.patch('/modify', async (req, res) => {
 // DELETE /product/delete
 product_router.delete('/delete', async (req, res) => {
   try {
+    // Connect to PSQL
+    // Assuming PSQL is hosted on DB Port and at Localhost
+    const database_connector = await database_promise;
+    
     const { product_ids } = req.body;
 
     const query = `
@@ -179,6 +195,10 @@ product_router.delete('/delete', async (req, res) => {
 // Endpoint to add products
 product_router.post('/add', async (req, res) => {
   try {
+    // Connect to PSQL
+    // Assuming PSQL is hosted on DB Port and at Localhost
+    const database_connector = await database_promise;
+    
     // Again, this just assumes you know the objects.
     // Enforcing and documentation to clarify later.
     const { productObjects } = req.body;
