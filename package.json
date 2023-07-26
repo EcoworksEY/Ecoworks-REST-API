@@ -1,6 +1,6 @@
 {
-  "name": "product-rest-api-microrepo",
-  "version": "0.0.0",
+  "name": "Ecoworks-Rest-API",
+  "version": "1.0.0",
   "description": "Products REST API Backend for Ecoworks",
   "main": "index.js",
   "scripts": {
