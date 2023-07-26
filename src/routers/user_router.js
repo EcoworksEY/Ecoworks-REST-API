@@ -50,7 +50,7 @@ user_router.post('/login', (req, res) => {
       res.status(401).json({ message: 'Authentication failed.' });
     } else {
       console.log('Authentication successful:', data);
-      res.status(200).json({ message: 'Authentication successful.' });
+      res.status(200).send(data);
     }
   });
 });
