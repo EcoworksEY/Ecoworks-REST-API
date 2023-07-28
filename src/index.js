@@ -23,7 +23,7 @@ app.use(cors());
 // Configure the app to use the routers
 app.use("/product", product_router);
 app.use("/auth", user_router);
-app.use("/", health_check_router);
+app.use("/health", health_check_router);
 
 // Start the app
 app.listen(port, () => console.log(`Server listening on port ${port}...`));
