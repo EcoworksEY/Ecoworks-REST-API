@@ -5,7 +5,7 @@
 const express = require("express");
 const health_check_router = express.Router();
 
-health_check_router.get('', async (req, res) => {
+health_check_router.get('/', async (req, res) => {
 res.status(200).json({ message: 'OK'});
 });
 
