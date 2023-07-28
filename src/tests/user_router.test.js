@@ -2,18 +2,20 @@
 // Written By Bardia Habibkhoda
 
 const request = require('supertest');
-const app = require('../app'); 
-const faker = require('faker');
+const app = require('../index'); 
+const Chance = require('chance');
+
+const chance = new Chance();
 
 const database_connector = require('../middleware/database_connector');
 
 // Create reusable but random user
-const randomUsername = faker.internet.userName();
-const randomPassword = faker.internet.password();
-const randomFamilyName = faker.name.lastName();
-const randomGivenName = faker.name.firstName();
-const randomEmail = faker.internet.email();
-const randomBirthdate = faker.date.past(30).toISOString().split('T')[0];
+const randomUsername = chance.username();
+const randomPassword = chance.string({ length: 10, symbols: true });
+const randomFamilyName = chance.last();
+const randomGivenName = chance.first();
+const randomEmail = chance.email();
+const randomBirthdate = chance.birthday({ string: true });
 
 describe('Test Authentication Endpoints', () => {
   // Remember! Actually testing this flow requires a verification code that can only be deomnstrated live

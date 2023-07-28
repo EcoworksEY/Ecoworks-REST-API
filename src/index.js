@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 const dotenv = require('dotenv').config();
 const product_router = require("./routers/product_router");
 const user_router = require('./routers/user_router');
+const cors = require('cors');
 
 // App setup with required dependencies
 const app = express();
@@ -15,6 +16,7 @@ const port = process.env.PORT || 3000;
 
 app.use(helmet());
 app.use(bodyParser.json());
+app.use(cors());
 
 
 // Configure the app to use the routers

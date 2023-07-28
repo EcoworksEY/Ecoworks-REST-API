@@ -2,8 +2,10 @@
 // Written by Bardia Habibkhoda
 
 const request = require('supertest');
-const app = require('../app'); 
-const faker = require('faker');
+const app = require('../index'); 
+const Chance = require('chance');
+
+const chance = new Chance();
 
 describe('Test Product Endpoints', () => {
   test('GET /product/list should return a list of all products and status 200', async () => {
@@ -85,18 +87,18 @@ describe('Test Product Endpoints', () => {
     // Assuming the provided product data is valid
     const newProductData = [
         {
-          product_id: faker.random.uuid(),
-          name: faker.commerce.productName(),
-          description: faker.commerce.productDescription(),
-          price: faker.commerce.price(),
-          sku_units: faker.random.number(),
+          product_id: chance.guid(),
+          name: chance.sentence({ words: 3 }),
+          description: chance.paragraph(),
+          price: chance.floating({ min: 1, max: 100, fixed: 2 }),
+          sku_units: chance.integer({ min: 1, max: 100 })
         },
         {
-          product_id: faker.random.uuid(),
-          name: faker.commerce.productName(),
-          description: faker.commerce.productDescription(),
-          price: faker.commerce.price(),
-          sku_units: faker.random.number(),
+          product_id: chance.guid(),
+          name: chance.sentence({ words: 3 }),
+          description: chance.paragraph(),
+          price: chance.floating({ min: 1, max: 100, fixed: 2 }),
+          sku_units: chance.integer({ min: 1, max: 100 })
         },
       ];
 
